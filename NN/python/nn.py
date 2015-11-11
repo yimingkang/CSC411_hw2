@@ -1,6 +1,7 @@
 from util import *
 import sys
 import matplotlib.pyplot as plt
+import time
 plt.ion()
 
 class DimensionMismatchError(Exception):
@@ -177,7 +178,7 @@ def main():
 
       for momentum in [0.9, 0.5, 0.0]:
           W1, W2, b1, b2, train_error, valid_error, train_class_error, valid_class_error = TrainNN(num_hiddens, eps, momentum, num_epochs)
-          # iterate through different eps
+          # iterate through different momentum
           suffix = '_at_momentum_' + str(momentum)
           suffix = suffix.replace('.', ',')
           DisplayErrorPlot(train_error, valid_error, mode='cross_entropy' + suffix)
@@ -188,13 +189,15 @@ def main():
       eps = 0.2
       momentum = 0.5
       for num_hiddens in [2, 5, 10, 30, 100]:
+          start = time.time()
           (
               W1, W2, b1, b2,
               train_error, valid_error, test_error,
               train_class_error, valid_class_error, test_class_error,
           ) = TrainNN(num_hiddens, eps, momentum, num_epochs, run_test=True)
-
-          # iterate through different eps
+          elapsed = time.time() - start
+          print "Training and testing time at hidden_unit=", num_hiddens, " is ", elapsed, "seconds"
+          # iterate through different num_hiddens
           suffix = '_at_hidden_unit_' + str(num_hiddens)
           DisplayErrorPlot(train_error, valid_error, mode='cross_entropy' + suffix, test=test_error)
           DisplayErrorPlot(train_class_error, valid_class_error, mode='classification_error' + suffix, test=test_class_error) 
