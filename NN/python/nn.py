@@ -14,7 +14,7 @@ def InitNN(num_inputs, num_hiddens, num_outputs):
   b2 = np.zeros((num_outputs, 1))
   return W1, W2, b1, b2
 
-def TrainNN(num_hiddens, eps, momentum, num_epochs):
+def TrainNN(num_hiddens, eps, momentum, num_epochs, run_test=False):
   """Trains a single hidden layer NN.
 
   Inputs:
@@ -40,8 +40,10 @@ def TrainNN(num_hiddens, eps, momentum, num_epochs):
   db2 = np.zeros(b2.shape)
   train_error = []
   valid_error = []
+  test_error = []
   train_class_error = []
   valid_class_error = []
+  test_class_error = []
   num_train_cases = inputs_train.shape[1]
   for epoch in xrange(num_epochs):
     # Forward prop
@@ -87,6 +89,14 @@ def TrainNN(num_hiddens, eps, momentum, num_epochs):
     valid_Err = Evaluate(inputs_valid, target_valid, W1, W2, b1, b2, output_Err=True)
     valid_class_error.append(valid_Err)
 
+    # generalize -- run test set as well
+    if run_test:
+        test_CE = Evaluate(inputs_test, target_test, W1, W2, b1, b2)
+        test_Err = Evaluate(inputs_test, target_test, W1, W2, b1, b2, output_Err=True)
+        test_error.append(test_CE)
+        test_class_error.append(test_Err)
+
+
     train_error.append(train_CE)
     valid_error.append(valid_CE)
     sys.stdout.write('\rStep %d Train CE %.5f Validation CE %.5f' % (epoch, train_CE, valid_CE))
@@ -99,6 +109,8 @@ def TrainNN(num_hiddens, eps, momentum, num_epochs):
   final_valid_error = Evaluate(inputs_valid, target_valid, W1, W2, b1, b2)
   final_test_error = Evaluate(inputs_test, target_test, W1, W2, b1, b2)
   print 'Error: Train %.5f Validation %.5f Test %.5f' % (final_train_error, final_valid_error, final_test_error)
+  if run_test:
+    return W1, W2, b1, b2, train_error, valid_error, test_error, train_class_error, valid_class_error, test_class_error
   return W1, W2, b1, b2, train_error, valid_error, train_class_error, valid_class_error
 
 def Evaluate(inputs, target, W1, W2, b1, b2, output_Err=False):
@@ -112,11 +124,13 @@ def Evaluate(inputs, target, W1, W2, b1, b2, output_Err=False):
       return get_error_perc(target, prediction)
   return CE
 
-def DisplayErrorPlot(train_error, valid_error, mode="Cross Entropy"):
+def DisplayErrorPlot(train_error, valid_error, mode="Cross Entropy", test=None):
   plt.figure(1)
   plt.clf()
   plt.plot(range(len(train_error)), train_error, 'b', label='Train')
   plt.plot(range(len(valid_error)), valid_error, 'g', label='Validation')
+  if test is not None:
+      plt.plot(range(len(test)), test, 'r', label='Test')
   plt.xlabel('Epochs')
   plt.ylabel(mode)
   plt.legend()
@@ -141,21 +155,49 @@ def main():
   eps = 0.1
   momentum = 0.0
   num_epochs = 1000
-  for eps in [0.5, 0.2, 0.1]:
-      W1, W2, b1, b2, train_error, valid_error, train_class_error, valid_class_error = TrainNN(num_hiddens, eps, momentum, num_epochs)
-      # iterate through different eps
-      suffix = '_at_eps_' + str(eps)
-      suffix = suffix.replace('.', ',')
-      DisplayErrorPlot(train_error, valid_error, mode='cross_entropy' + suffix)
-      DisplayErrorPlot(train_class_error, valid_class_error, mode='classification_error' + suffix) 
 
-  for momentum in [0.9, 0.5, 0.0]:
+  current_problem = [2.4]
+  print "Running problems: ", current_problem
+
+  # 2.1 and 2.2
+  if 2.2 in current_problem and 2.1 in current_problem:
       W1, W2, b1, b2, train_error, valid_error, train_class_error, valid_class_error = TrainNN(num_hiddens, eps, momentum, num_epochs)
-      # iterate through different eps
-      suffix = '_at_momentum_' + str(momentum)
-      suffix = suffix.replace('.', ',')
-      DisplayErrorPlot(train_error, valid_error, mode='cross_entropy' + suffix)
-      DisplayErrorPlot(train_class_error, valid_class_error, mode='classification_error' + suffix) 
+      DisplayErrorPlot(train_error, valid_error, mode='cross_entropy')
+      DisplayErrorPlot(train_class_error, valid_class_error, mode='classification_error') 
+
+  # 2.3
+  if 2.3 in current_problem:
+      for eps in [0.5, 0.2, 0.1]:
+          W1, W2, b1, b2, train_error, valid_error, train_class_error, valid_class_error = TrainNN(num_hiddens, eps, momentum, num_epochs)
+          # iterate through different eps
+          suffix = '_at_eps_' + str(eps)
+          suffix = suffix.replace('.', ',')
+          DisplayErrorPlot(train_error, valid_error, mode='cross_entropy' + suffix)
+          DisplayErrorPlot(train_class_error, valid_class_error, mode='classification_error' + suffix) 
+
+      for momentum in [0.9, 0.5, 0.0]:
+          W1, W2, b1, b2, train_error, valid_error, train_class_error, valid_class_error = TrainNN(num_hiddens, eps, momentum, num_epochs)
+          # iterate through different eps
+          suffix = '_at_momentum_' + str(momentum)
+          suffix = suffix.replace('.', ',')
+          DisplayErrorPlot(train_error, valid_error, mode='cross_entropy' + suffix)
+          DisplayErrorPlot(train_class_error, valid_class_error, mode='classification_error' + suffix) 
+
+  # 2.4
+  if 2.4 in current_problem:
+      eps = 0.2
+      momentum = 0.5
+      for num_hiddens in [2, 5, 10, 30, 100]:
+          (
+              W1, W2, b1, b2,
+              train_error, valid_error, test_error,
+              train_class_error, valid_class_error, test_class_error,
+          ) = TrainNN(num_hiddens, eps, momentum, num_epochs, run_test=True)
+
+          # iterate through different eps
+          suffix = '_at_hidden_unit_' + str(num_hiddens)
+          DisplayErrorPlot(train_error, valid_error, mode='cross_entropy' + suffix, test=test_error)
+          DisplayErrorPlot(train_class_error, valid_class_error, mode='classification_error' + suffix, test=test_class_error) 
 
   # If you wish to save the model for future use :
   # outputfile = 'model.npz'
