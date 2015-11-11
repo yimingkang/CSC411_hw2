@@ -3,6 +3,9 @@ import sys
 import matplotlib.pyplot as plt
 plt.ion()
 
+class DimensionMismatchError(Exception):
+    pass
+
 def InitNN(num_inputs, num_hiddens, num_outputs):
   """Initializes NN parameters."""
   W1 = 0.01 * np.random.randn(num_inputs, num_hiddens)
@@ -37,6 +40,8 @@ def TrainNN(num_hiddens, eps, momentum, num_epochs):
   db2 = np.zeros(b2.shape)
   train_error = []
   valid_error = []
+  train_class_error = []
+  valid_class_error = []
   num_train_cases = inputs_train.shape[1]
   for epoch in xrange(num_epochs):
     # Forward prop
@@ -48,6 +53,10 @@ def TrainNN(num_hiddens, eps, momentum, num_epochs):
     # Compute cross entropy
     train_CE = -np.mean(target_train * np.log(prediction) + (1 - target_train) * np.log(1 - prediction))
 
+    # Calculate classification error
+    train_Err = get_error_perc(target_train, prediction) 
+    train_class_error.append(train_Err)
+    
     # Compute deriv
     dEbydlogit = prediction - target_train
 
@@ -74,6 +83,10 @@ def TrainNN(num_hiddens, eps, momentum, num_epochs):
 
     valid_CE = Evaluate(inputs_valid, target_valid, W1, W2, b1, b2)
 
+    # get classification error
+    valid_Err = Evaluate(inputs_valid, target_valid, W1, W2, b1, b2, output_Err=True)
+    valid_class_error.append(valid_Err)
+
     train_error.append(train_CE)
     valid_error.append(valid_CE)
     sys.stdout.write('\rStep %d Train CE %.5f Validation CE %.5f' % (epoch, train_CE, valid_CE))
@@ -86,26 +99,29 @@ def TrainNN(num_hiddens, eps, momentum, num_epochs):
   final_valid_error = Evaluate(inputs_valid, target_valid, W1, W2, b1, b2)
   final_test_error = Evaluate(inputs_test, target_test, W1, W2, b1, b2)
   print 'Error: Train %.5f Validation %.5f Test %.5f' % (final_train_error, final_valid_error, final_test_error)
-  return W1, W2, b1, b2, train_error, valid_error
+  return W1, W2, b1, b2, train_error, valid_error, train_class_error, valid_class_error
 
-def Evaluate(inputs, target, W1, W2, b1, b2):
+def Evaluate(inputs, target, W1, W2, b1, b2, output_Err=False):
   """Evaluates the model on inputs and target."""
   h_input = np.dot(W1.T, inputs) + b1  # Input to hidden layer.
   h_output = 1 / (1 + np.exp(-h_input))  # Output of hidden layer.
   logit = np.dot(W2.T, h_output) + b2  # Input to output layer.
   prediction = 1 / (1 + np.exp(-logit))  # Output prediction.
   CE = -np.mean(target * np.log(prediction) + (1 - target) * np.log(1 - prediction))
+  if output_Err:
+      return get_error_perc(target, prediction)
   return CE
 
-def DisplayErrorPlot(train_error, valid_error):
+def DisplayErrorPlot(train_error, valid_error, mode="Cross Entropy"):
   plt.figure(1)
   plt.clf()
   plt.plot(range(len(train_error)), train_error, 'b', label='Train')
   plt.plot(range(len(valid_error)), valid_error, 'g', label='Validation')
   plt.xlabel('Epochs')
-  plt.ylabel('Cross entropy')
+  plt.ylabel(mode)
   plt.legend()
-  plt.show()
+  #plt.show()
+  plt.savefig("nn_10_layer_" + mode)
   raw_input('Press Enter to exit.')
 
 def SaveModel(modelfile, W1, W2, b1, b2, train_error, valid_error):
@@ -125,11 +141,25 @@ def main():
   eps = 0.1
   momentum = 0.0
   num_epochs = 1000
-  W1, W2, b1, b2, train_error, valid_error = TrainNN(num_hiddens, eps, momentum, num_epochs)
-  DisplayErrorPlot(train_error, valid_error) 
+  W1, W2, b1, b2, train_error, valid_error, train_class_error, valid_class_error = TrainNN(num_hiddens, eps, momentum, num_epochs)
+  #DisplayErrorPlot(train_error, valid_error, mode="cross_entropy")
+  DisplayErrorPlot(train_class_error, valid_class_error, mode="classification_error") 
   # If you wish to save the model for future use :
   # outputfile = 'model.npz'
   # SaveModel(outputfile, W1, W2, b1, b2, train_error, valid_error)
+
+def get_error_perc(target, prediction):
+    if len(target[0]) != len(prediction[0]):
+        raise DimensionMismatchError(
+                "Dimension of target does not match that of prediction! {0} : {1}"
+                .format(len(target), len(prediction))
+        )
+    n_sample = len(target[0])
+    n_correct = 0
+    for (t, p) in zip(target[0], prediction[0]):
+        if (t == 1 and p >= 0.5) or (t == 0 and p < 0.5):
+            n_correct += 1
+    return 1.0 - 1.0 * n_correct / n_sample
 
 if __name__ == '__main__':
   main()
