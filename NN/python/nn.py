@@ -157,7 +157,7 @@ def main():
   momentum = 0.0
   num_epochs = 1000
 
-  current_problem = [2.4]
+  current_problem = [2.1, 2.2, 2.3, 2.4]
   print "Running problems: ", current_problem
 
   # 2.1 and 2.2
@@ -217,7 +217,7 @@ def get_error_perc(target, prediction):
     for (t, p) in zip(target[0], prediction[0]):
         if (t == 1 and p >= 0.5) or (t == 0 and p < 0.5):
             n_correct += 1
-    return 1.0 - 1.0 * n_correct / n_sample
+    return 100.0 - 100.0 * n_correct / n_sample
 
 if __name__ == '__main__':
   main()
