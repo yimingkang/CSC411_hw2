@@ -122,7 +122,7 @@ def DisplayErrorPlot(train_error, valid_error, mode="Cross Entropy"):
   plt.legend()
   #plt.show()
   plt.savefig("nn_10_layer_" + mode)
-  raw_input('Press Enter to exit.')
+  #raw_input('Press Enter to exit.')
 
 def SaveModel(modelfile, W1, W2, b1, b2, train_error, valid_error):
   """Saves the model to a numpy file."""
@@ -141,9 +141,22 @@ def main():
   eps = 0.1
   momentum = 0.0
   num_epochs = 1000
-  W1, W2, b1, b2, train_error, valid_error, train_class_error, valid_class_error = TrainNN(num_hiddens, eps, momentum, num_epochs)
-  #DisplayErrorPlot(train_error, valid_error, mode="cross_entropy")
-  DisplayErrorPlot(train_class_error, valid_class_error, mode="classification_error") 
+  for eps in [0.5, 0.2, 0.1]:
+      W1, W2, b1, b2, train_error, valid_error, train_class_error, valid_class_error = TrainNN(num_hiddens, eps, momentum, num_epochs)
+      # iterate through different eps
+      suffix = '_at_eps_' + str(eps)
+      suffix = suffix.replace('.', ',')
+      DisplayErrorPlot(train_error, valid_error, mode='cross_entropy' + suffix)
+      DisplayErrorPlot(train_class_error, valid_class_error, mode='classification_error' + suffix) 
+
+  for momentum in [0.9, 0.5, 0.0]:
+      W1, W2, b1, b2, train_error, valid_error, train_class_error, valid_class_error = TrainNN(num_hiddens, eps, momentum, num_epochs)
+      # iterate through different eps
+      suffix = '_at_momentum_' + str(momentum)
+      suffix = suffix.replace('.', ',')
+      DisplayErrorPlot(train_error, valid_error, mode='cross_entropy' + suffix)
+      DisplayErrorPlot(train_class_error, valid_class_error, mode='classification_error' + suffix) 
+
   # If you wish to save the model for future use :
   # outputfile = 'model.npz'
   # SaveModel(outputfile, W1, W2, b1, b2, train_error, valid_error)
