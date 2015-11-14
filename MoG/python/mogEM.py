@@ -144,12 +144,12 @@ def q3():
 def q4():
   iters = 10
   minVary = 0.01
-  errorTrain = np.zeros(4)
-  errorTest = np.zeros(4)
-  errorValidation = np.zeros(4)
-  print(errorTrain)
   numComponents = np.array([2, 5, 15, 25])
   T = numComponents.shape[0]  
+
+  errorTrain = np.zeros(T)
+  errorTest = np.zeros(T)
+  errorValidation = np.zeros(T)
   inputs_train, inputs_valid, inputs_test, target_train, target_valid, target_test = LoadData('digits.npz')
   train2, valid2, test2, target_train2, target_valid2, target_test2 = LoadData('digits.npz', True, False)
   train3, valid3, test3, target_train3, target_valid3, target_test3 = LoadData('digits.npz', False, True)
@@ -214,9 +214,57 @@ def q5():
   # Choose the best mixture of Gaussian classifier you have, compare this
   # mixture of Gaussian classifier with the neural network you implemented in
   # the last assignment.
+  iters = 10
+  minVary = 0.01
+  errorTrain = np.zeros(4)
+  errorTest = np.zeros(4)
+  errorValidation = np.zeros(4)
+  K = 25
+  inputs_train, inputs_valid, inputs_test, target_train, target_valid, target_test = LoadData('digits.npz')
+  train2, valid2, test2, target_train2, target_valid2, target_test2 = LoadData('digits.npz', True, False)
+  train3, valid3, test3, target_train3, target_valid3, target_test3 = LoadData('digits.npz', False, True)
+
+  # Train model with K components
+  p2, mu2, var2, logProbX2 = mogEM(train2, K, iters, minVary, use_kmeans=True)
+  p3, mu3, var3, logProbX3 = mogEM(train3, K, iters, minVary, use_kmeans=True)
+
+  p_d1_valid = mogLogProb(p2, mu2, var2, inputs_valid)
+  p_d2_valid = mogLogProb(p3, mu3, var3, inputs_valid)
+  
+  p_d1_train = mogLogProb(p2, mu2, var2, inputs_train)
+  p_d2_train = mogLogProb(p3, mu3, var3, inputs_train)
+  
+  p_d1_test = mogLogProb(p2, mu2, var2, inputs_test)
+  p_d2_test = mogLogProb(p3, mu3, var3, inputs_test)
+  
+  # classified as '3' iff p_d2 >= p_d1
+  decision_train = p_d2_train >= p_d1_train
+  decision_valid = p_d2_valid >= p_d1_valid
+  decision_test = p_d2_test >= p_d1_test
+  # correct_valid[i] == 1 iff decision_valid[i] == target_valid[i], 0 otherwise
+  correct_train = decision_train == target_train
+  correct_valid = decision_valid == target_valid
+  correct_test = decision_test == target_test
+  # perc_error = 1 - perc_correct
+  print "Validation error: ", 1.0 - correct_valid.mean()
+  print "Train error: ", 1.0 - correct_train.mean()
+  print "Test error: ", 1.0 - correct_test.mean()
 
   # Train neural network classifier. The number of hidden units should be
   # equal to the number of mixture components.
+  import nn
+  eps = 0.2
+  momentum = 0.5
+  num_epochs = 1000
+  (
+      W1, W2, b1, b2,
+      train_error, valid_error, test_error,
+      train_class_error, valid_class_error, test_class_error,
+  ) = nn.TrainNN(K, eps, momentum, num_epochs, run_test=True)
+
+  print "NN Train error: ", train_class_error[-1]
+  print "NN Validation error: ", valid_class_error[-1]
+  print "NN Test error: ", test_class_error[-1]
 
   # Show the error rate comparison.
   #-------------------- Add your code here --------------------------------
@@ -226,6 +274,5 @@ def q5():
 if __name__ == '__main__':
   #q2() 
   #q3()
-  q4()
-  #q5()
-
+  #q4()
+  q5()
