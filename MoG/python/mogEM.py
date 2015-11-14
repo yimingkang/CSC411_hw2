@@ -3,7 +3,7 @@ import sys
 import matplotlib.pyplot as plt
 plt.ion()
 
-def mogEM(x, K, iters, minVary=0):
+def mogEM(x, K, iters, minVary=0, use_kmeans=False):
   """
   Fits a Mixture of K Gaussians on x.
   Inputs:
@@ -21,7 +21,7 @@ def mogEM(x, K, iters, minVary=0):
   N, T = x.shape
 
   # Initialize the parameters
-  randConst = 1
+  randConst = 10
   p = randConst + np.random.rand(K, 1)
   p = p / np.sum(p)
   mn = np.mean(x, axis=1).reshape(-1, 1)
@@ -30,6 +30,10 @@ def mogEM(x, K, iters, minVary=0):
   # Change the initializaiton with Kmeans here
   #--------------------  Add your code here --------------------  
   mu = mn + np.random.randn(N, K) * (np.sqrt(vr) / randConst)
+
+  if use_kmeans:
+      # initialize with kmeans with 5 iterations
+      mu = KMeans(x, K, 5)
   
   #------------------------------------------------------------  
   vary = vr * np.ones((1, K)) * 2
@@ -101,12 +105,38 @@ def mogLogProb(p, mu, vary, x):
     logProb[t] = np.log(np.sum(np.exp(logPcAndx - mx))) + mx;
   return logProb
 
+def q2():
+  iters = 10
+  minVary = 0.01
+  nCluster = 2
+
+  inputs_train2, _, _, _, _, _ =  LoadData('digits.npz', True, False)
+  inputs_train3, _, _, _, _, _ = LoadData('digits.npz', False, True)
+  p2, mu2, var2, logProbX2 = mogEM(inputs_train2, nCluster, iters, minVary)
+  p3, mu3, var3, logProbX3 = mogEM(inputs_train3, nCluster, iters, minVary)
+  
+  ShowMeans(mu2, title='MoG_clustering_result_for_2_mean')
+  ShowMeans(mu3, title='MoG_clustering_result_for_3_mean')
+
+  ShowMeans(var2, title='MoG_clustering_result_for_2_var')
+  ShowMeans(var3, title='MoG_clustering_result_for_3_var')
+
+  print "LogProbX for 2 is: ", logProbX2[-1]
+  print "Mixing for 2 is: ", p2
+  print "************************************"
+  print "LogProbX for 3 is: ", logProbX3[-1]
+  print "Mixing for 3 is: ", p3
+
 def q3():
   iters = 10
   minVary = 0.01
+  nCluster = 20
   inputs_train, inputs_valid, inputs_test, target_train, target_valid, target_test = LoadData('digits.npz')
   # Train a MoG model with 20 components on all 600 training
   # vectors, with both original initialization and kmeans initialization.
+  p, mu, var, logProbX = mogEM(inputs_train, nCluster, iters, minVary, use_kmeans=True)
+  print "LogProbX is: ", logProbX[-1]
+  ShowMeans(mu, title="MoG_with_kmeans_initialization")
   #------------------- Add your code here ---------------------
 
   raw_input('Press Enter to continue.')
@@ -161,7 +191,8 @@ def q5():
   raw_input('Press Enter to continue.')
 
 if __name__ == '__main__':
+  #q2() 
   q3()
-  q4()
-  q5()
+  #q4()
+  #q5()
 
