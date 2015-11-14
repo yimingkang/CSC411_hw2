@@ -140,6 +140,7 @@ def q3():
   #------------------- Add your code here ---------------------
 
   raw_input('Press Enter to continue.')
+
 def q4():
   iters = 10
   minVary = 0.01
@@ -157,24 +158,56 @@ def q4():
     K = numComponents[t]
     # Train a MoG model with K components for digit 2
     #-------------------- Add your code here --------------------------------
+    p2, mu2, var2, logProbX2 = mogEM(train2, K, iters, minVary, use_kmeans=True)
 
     
     # Train a MoG model with K components for digit 3
     #-------------------- Add your code here --------------------------------
+    p3, mu3, var3, logProbX3 = mogEM(train3, K, iters, minVary, use_kmeans=True)
 
     
     # Caculate the probability P(d=1|x) and P(d=2|x),
-    # classify examples, and compute error rate
-    # Hints: you may want to use mogLogProb function
-    #-------------------- Add your code here --------------------------------
-    
+    # classify validation set, and compute error rate
+
+    # comptue P(d=1|x), a vector of lenght k representing the probability of 
+    # P(d=1_i|x) for i in [1,...,K]
+    p_d1_valid = mogLogProb(p2, mu2, var2, inputs_valid)
+    p_d2_valid = mogLogProb(p3, mu3, var3, inputs_valid)
+
+    p_d1_train = mogLogProb(p2, mu2, var2, inputs_train)
+    p_d2_train = mogLogProb(p3, mu3, var3, inputs_train)
+
+    p_d1_test = mogLogProb(p2, mu2, var2, inputs_test)
+    p_d2_test = mogLogProb(p3, mu3, var3, inputs_test)
+
+    # classified as '3' iff p_d2 >= p_d1
+    decision_train = p_d2_train >= p_d1_train
+    decision_valid = p_d2_valid >= p_d1_valid
+    decision_test = p_d2_test >= p_d1_test
+    # correct_valid[i] == 1 iff decision_valid[i] == target_valid[i], 0 otherwise
+    correct_train = decision_train == target_train
+    correct_valid = decision_valid == target_valid
+    correct_test = decision_test == target_test
+    # perc_error = 1 - perc_correct
+    errorValidation[t] = 1.0 - correct_valid.mean()
+    errorTrain[t] = 1.0 - correct_train.mean()
+    errorTest[t] = 1.0 - correct_test.mean()
     
   # Plot the error rate
+  print "Train: ", errorTrain
+  print "Validation: ", errorValidation
+  print "Test: ", errorTest
   plt.clf()
   #-------------------- Add your code here --------------------------------
-  
-
+  plt.title("MoG_number_of_components")
+  plt.plot(numComponents, errorTrain, 'r', label='Train_perc_error')
+  plt.plot(numComponents, errorValidation, 'g', label='Validation_perc_error')
+  plt.plot(numComponents, errorTest, 'b', label='Test_perc_error')
+  plt.legend()
+  plt.xlabel('Number of components in MoG')
+  plt.ylabel('Classification error');
   plt.draw()
+  plt.savefig("MoG_num_component_vs_error")
   raw_input('Press Enter to continue.')
 
 def q5():
@@ -192,7 +225,7 @@ def q5():
 
 if __name__ == '__main__':
   #q2() 
-  q3()
-  #q4()
+  #q3()
+  q4()
   #q5()
 
