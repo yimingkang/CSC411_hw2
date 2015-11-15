@@ -136,9 +136,21 @@ def q3():
   # vectors, with both original initialization and kmeans initialization.
   p, mu, var, logProbX = mogEM(inputs_train, nCluster, iters, minVary, use_kmeans=False)
   print "LogProbX without kmeans is: ", logProbX
+  plt.clf()
+  plt.title("Log probability without kmeans initialization")
+  plt.xlabel("iterations")
+  plt.ylabel("log(P(X))")
+  plt.plot(range(1, len(logProbX) + 1), logProbX)
+  plt.savefig("log_px_without_kmeans")
  
   p, mu, var, logProbX = mogEM(inputs_train, nCluster, iters, minVary, use_kmeans=True)
   print "LogProbX with kmeans is: ", logProbX
+  plt.clf()
+  plt.title("Log probability with kmeans initialization")
+  plt.xlabel("iterations")
+  plt.ylabel("log(P(X))")
+  plt.plot(range(1, len(logProbX) + 1), logProbX)
+  plt.savefig("log_px_with_kmeans")
   #------------------- Add your code here ---------------------
 
   raw_input('Press Enter to continue.')
@@ -274,7 +286,7 @@ def q5():
   raw_input('Press Enter to continue.')
 
 if __name__ == '__main__':
-  q2() 
+  #q2() 
   q3()
   #q4()
   #q5()
