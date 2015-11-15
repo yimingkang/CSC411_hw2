@@ -49,12 +49,10 @@ def TrainNN(num_hiddens, eps, momentum, num_epochs, run_test=False):
   num_train_cases = inputs_train.shape[1]
   for epoch in xrange(num_epochs):
     # Forward prop
-    print "Shape of inputs_train is: ", inputs_train.shape
-    print "Shape of W1 is: ", W1.shape
     h_input = np.dot(W1.T, inputs_train) + b1  # Input to hidden layer.
     if epoch % 100 == 0:
-        print "Shape of h_input is: ", h_input.shape
-        show_img(h_input, "NN_epoch_at_" + str(epoch))
+        #print "Shape of W1 is: ", W1.shape
+        show_img(W1, "NN_epoch_at_" + str(epoch))
     h_output = 1 / (1 + np.exp(-h_input))  # Output of hidden layer.
     logit = np.dot(W2.T, h_output) + b2  # Input to output layer.
     prediction = 1 / (1 + np.exp(-logit))  # Output prediction.
@@ -163,8 +161,18 @@ def main():
   momentum = 0.0
   num_epochs = 1000
 
-  current_problem = [2.1, 2.2, 2.3, 2.4]
+  current_problem = [3.5]
   print "Running problems: ", current_problem
+  # 3.5
+  if 3.5 in current_problem:
+      num_hiddens = 5
+      num_epochs = 1000
+      (
+          W1, W2, b1, b2,
+          train_error, valid_error,
+          train_class_error, valid_class_error,
+      ) = TrainNN(num_hiddens, eps, momentum, num_epochs)
+      num_hiddens = 10
 
   # 2.1 and 2.2
   if 2.2 in current_problem and 2.1 in current_problem:
