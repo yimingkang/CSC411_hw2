@@ -135,22 +135,18 @@ def q3():
   # Train a MoG model with 20 components on all 600 training
   # vectors, with both original initialization and kmeans initialization.
   p, mu, var, logProbX = mogEM(inputs_train, nCluster, iters, minVary, use_kmeans=False)
+  p, mu, var, logProbX_kmeans = mogEM(inputs_train, nCluster, iters, minVary, use_kmeans=True)
   print "LogProbX without kmeans is: ", logProbX
+  print "LogProbX with kmeans is: ", logProbX_kmeans
+
   plt.clf()
-  plt.title("Log probability without kmeans initialization")
+  plt.title("Log probability with/without kmeans initialization")
   plt.xlabel("iterations")
   plt.ylabel("log(P(X))")
-  plt.plot(range(1, len(logProbX) + 1), logProbX)
-  plt.savefig("log_px_without_kmeans")
- 
-  p, mu, var, logProbX = mogEM(inputs_train, nCluster, iters, minVary, use_kmeans=True)
-  print "LogProbX with kmeans is: ", logProbX
-  plt.clf()
-  plt.title("Log probability with kmeans initialization")
-  plt.xlabel("iterations")
-  plt.ylabel("log(P(X))")
-  plt.plot(range(1, len(logProbX) + 1), logProbX)
-  plt.savefig("log_px_with_kmeans")
+  plt.plot(range(1, len(logProbX) + 1), logProbX, 'g', label='without kmeans')
+  plt.plot(range(1, len(logProbX_kmeans) + 1), logProbX_kmeans, 'b', label='with kmeans')
+  plt.legend()
+  plt.savefig("log_px_and_kmeans")
   #------------------- Add your code here ---------------------
 
   raw_input('Press Enter to continue.')
