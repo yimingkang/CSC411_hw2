@@ -2,6 +2,7 @@ from util import *
 import sys
 import matplotlib.pyplot as plt
 import time
+from kmeans import ShowMeans as show_img
 plt.ion()
 
 class DimensionMismatchError(Exception):
@@ -48,7 +49,12 @@ def TrainNN(num_hiddens, eps, momentum, num_epochs, run_test=False):
   num_train_cases = inputs_train.shape[1]
   for epoch in xrange(num_epochs):
     # Forward prop
+    print "Shape of inputs_train is: ", inputs_train.shape
+    print "Shape of W1 is: ", W1.shape
     h_input = np.dot(W1.T, inputs_train) + b1  # Input to hidden layer.
+    if epoch % 100 == 0:
+        print "Shape of h_input is: ", h_input.shape
+        show_img(h_input, "NN_epoch_at_" + str(epoch))
     h_output = 1 / (1 + np.exp(-h_input))  # Output of hidden layer.
     logit = np.dot(W2.T, h_output) + b2  # Input to output layer.
     prediction = 1 / (1 + np.exp(-logit))  # Output prediction.

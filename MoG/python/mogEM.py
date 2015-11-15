@@ -134,9 +134,11 @@ def q3():
   inputs_train, inputs_valid, inputs_test, target_train, target_valid, target_test = LoadData('digits.npz')
   # Train a MoG model with 20 components on all 600 training
   # vectors, with both original initialization and kmeans initialization.
+  p, mu, var, logProbX = mogEM(inputs_train, nCluster, iters, minVary, use_kmeans=False)
+  print "LogProbX without kmeans is: ", logProbX
+ 
   p, mu, var, logProbX = mogEM(inputs_train, nCluster, iters, minVary, use_kmeans=True)
-  print "LogProbX is: ", logProbX[-1]
-  ShowMeans(mu, title="MoG_with_kmeans_initialization")
+  print "LogProbX with kmeans is: ", logProbX
   #------------------- Add your code here ---------------------
 
   raw_input('Press Enter to continue.')
@@ -272,7 +274,7 @@ def q5():
   raw_input('Press Enter to continue.')
 
 if __name__ == '__main__':
-  #q2() 
-  #q3()
+  q2() 
+  q3()
   #q4()
-  q5()
+  #q5()
