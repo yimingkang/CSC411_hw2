@@ -107,7 +107,10 @@ def TrainNN(num_hiddens, eps, momentum, num_epochs, run_test=False):
 
   sys.stdout.write('\n')
   final_train_error = Evaluate(inputs_train, target_train, W1, W2, b1, b2)
+  start = time.time()
   final_valid_error = Evaluate(inputs_valid, target_valid, W1, W2, b1, b2)
+  elapsed = time.time() - start
+  print "Evaluation took: ", elapsed, " seconds"
   final_test_error = Evaluate(inputs_test, target_test, W1, W2, b1, b2)
   print 'Error: Train %.5f Validation %.5f Test %.5f' % (final_train_error, final_valid_error, final_test_error)
   if run_test:
@@ -157,7 +160,7 @@ def main():
   momentum = 0.0
   num_epochs = 1000
 
-  current_problem = [2.4]
+  current_problem = [2.1, 2.2]
   print "Running problems: ", current_problem
 
   # 2.1 and 2.2
@@ -190,13 +193,11 @@ def main():
       eps = 0.02
       momentum = 0.5
       for num_hiddens in [2, 5, 10, 30, 100]:
-          start = time.time()
           (
               W1, W2, b1, b2,
               train_error, valid_error, test_error,
               train_class_error, valid_class_error, test_class_error,
           ) = TrainNN(num_hiddens, eps, momentum, num_epochs, run_test=True)
-          elapsed = time.time() - start
           print "Training and testing time at hidden_unit=", num_hiddens, " is ", elapsed, "seconds"
           # iterate through different num_hiddens
           suffix = '_at_hidden_unit_' + str(num_hiddens)

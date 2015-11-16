@@ -161,7 +161,7 @@ def main():
   momentum = 0.0
   num_epochs = 1000
 
-  current_problem = [3.5]
+  current_problem = [2.1, 2.2, 2.3, 2.4, 2.5]
   print "Running problems: ", current_problem
   # 3.5
   if 3.5 in current_problem:

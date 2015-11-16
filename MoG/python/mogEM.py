@@ -229,7 +229,7 @@ def q5():
   errorTrain = np.zeros(4)
   errorTest = np.zeros(4)
   errorValidation = np.zeros(4)
-  K = 25
+  K = 5
   inputs_train, inputs_valid, inputs_test, target_train, target_valid, target_test = LoadData('digits.npz')
   train2, valid2, test2, target_train2, target_valid2, target_test2 = LoadData('digits.npz', True, False)
   train3, valid3, test3, target_train3, target_valid3, target_test3 = LoadData('digits.npz', False, True)
@@ -263,8 +263,8 @@ def q5():
   # Train neural network classifier. The number of hidden units should be
   # equal to the number of mixture components.
   import nn
-  eps = 0.2
-  momentum = 0.5
+  eps = 0.1
+  momentum = 0
   num_epochs = 1000
   (
       W1, W2, b1, b2,
@@ -283,6 +283,6 @@ def q5():
 
 if __name__ == '__main__':
   #q2() 
-  q3()
+  #q3()
   #q4()
-  #q5()
+  q5()
