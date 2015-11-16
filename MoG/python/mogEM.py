@@ -282,7 +282,7 @@ def q5():
   raw_input('Press Enter to continue.')
 
 if __name__ == '__main__':
-  #q2() 
-  #q3()
-  #q4()
+  q2() 
+  q3()
+  q4()
   q5()
