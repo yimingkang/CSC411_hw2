@@ -14,14 +14,6 @@ def get_perc(test, target):
 
 def main():
     train_data, valid_data, test_data, train_labels, valid_labels, test_labels = LoadData('digits.npz')
-    print train_data.shape
-    print train_labels.shape
-
-    print valid_data.shape
-    print valid_labels.shape
-
-    print test_data.shape
-    print test_labels.shape
     
     print "VALIDATION"
     for i in [1, 3, 5, 7, 9]:
